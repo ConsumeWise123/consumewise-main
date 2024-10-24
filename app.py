@@ -840,10 +840,17 @@ class ChatManager:
                 user_input, "", data_extractor_url, extract_info=True
             )
             st.session_state.product_selected = True
-            if msg != "product not found because image is not clear":
-                return msg, "success"
+            if msg != "product not found because image is not clear" and "Product information could not be extracted from the image" not in msg:
+                response = msg
+                status = "success"
+            elif msg == "product not found because image is not clear":
+                response = msg + ". Please share clear image URLs!"
+                status = "no success"
             else:
-                return msg + ". Please share clear image URLs!", "no success"
+                response = msg + ".Please re-try!!"
+                status = "no success"
+                
+            return response, status
                 
         return "Please provide valid image URL of the product.", "no success"
 
@@ -883,8 +890,12 @@ def main():
             
             # Process response
             response, status = ChatManager.process_response(user_input)
-            
-            if status == "success":
+
+            st.session_state.messages.append({"role": "assistant", "content": response})
+            with st.chat_message("assistant"):
+                st.markdown(response)
+                    
+            if status == "success":               
                 SessionState.initialize()  # Reset states for next product
                 #st.session_state.welcome_msg = "What is the next product you would like me to analyze today?"
                 keys_to_keep = ["messages", "welcome_msg"]
@@ -893,14 +904,10 @@ def main():
                 for key in keys_to_delete:
                     del st.session_state[key]
                 st.session_state.welcome_msg = "What product would you like me to analyze next?"
-                st.rerun()
                 
-            else:
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                with st.chat_message("assistant"):
-                    st.markdown(response)
-                print(f"DEBUG : st.session_state.awaiting_selection : {st.session_state.awaiting_selection}")
-                st.rerun()
+            #else:
+            #    print(f"DEBUG : st.session_state.awaiting_selection : {st.session_state.awaiting_selection}")
+            st.rerun()
     else:
         # Disable chat input while selection is in progress
         st.chat_input("Please confirm your selection above first...", disabled=True)
