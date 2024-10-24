@@ -685,7 +685,7 @@ def chatbot_response(image_urls_str, product_name_by_user, data_extractor_url, e
                 product_info_raw = get_product_data_from_db(product_name_by_user, data_extractor_url)
                 print(f"DEBUG product_info_raw from name: {product_info_raw}")
                 if product_info_raw == "{}":
-                    return [], "product not found from the db"
+                    return [], "product not found because product information in the db is corrupt"
                 if 'error' not in json.loads(product_info_raw).keys():
                     final_analysis = analyze_product(product_info_raw)
                     return [], final_analysis
@@ -765,12 +765,16 @@ class ProductSelector:
                 if confirm_clicked:
                     st.session_state.awaiting_selection = False
                     if choice != "None of the above":
-                        st.session_state.selected_product = choice
+                        #st.session_state.selected_product = choice
                         st.session_state.messages.append({"role": "assistant", "content": f"You selected {choice}"})
                         _, msg = chatbot_response("", choice, data_extractor_url="", extract_info=True)
-                        if msg != "product not found from the db" and msg != "product not found because product information in the db is corrupt":
+                        #Check if analysis couldn't be done because db had incomplete information
+                        if msg != "product not found because product information in the db is corrupt":
                             #Only when msg is acceptable
                             st.session_state.messages.append({"role": "assistant", "content": msg})
+                            with st.chat_message("assistant"):
+                                st.markdown(msg)
+                                
                             st.session_state.product_selected = True
                             
                             keys_to_keep = ["messages", "welcome_msg"]
@@ -780,12 +784,13 @@ class ProductSelector:
                                 del st.session_state[key]
                             st.session_state.welcome_msg = "What product would you like me to analyze next?"
                             
-                    if choice == "None of the above" or msg == "product not found from the db" or msg == "product not found because product information in the db is corrupt":
+                    if choice == "None of the above" or msg == "product not found because product information in the db is corrupt":
                         st.session_state.messages.append(
                             {"role": "assistant", "content": "Please provide the image URL of the product to analyze based on the latest information."}
                         )
-                        if msg == "product not found from the db" or msg == "product not found because product information in the db is corrupt":
-                            st.session_state.selected_product = None
+                        with st.chat_message("assistant"):
+                            st.markdown("Please provide the image URL of the product to analyze based on the latest information.")
+                        #st.session_state.selected_product = None
                         
                     st.rerun()
                 
@@ -800,10 +805,11 @@ class ChatManager:
     def process_response(user_input):
         if not st.session_state.product_selected:
             if "http:/" not in user_input and "https:/" not in user_input:
-                return ChatManager._handle_product_name(user_input)
+                response, status = ChatManager._handle_product_name(user_input)
             else:
-                return ChatManager._handle_product_url(user_input)
-        return "Next Product"
+                response, status = ChatManager._handle_product_url(user_input)
+                
+        return response, status
 
     @staticmethod
     def _handle_product_name(user_input):
@@ -817,8 +823,9 @@ class ChatManager:
         if len(similar_products) > 0:
             st.session_state.similar_products = similar_products
             st.session_state.awaiting_selection = True
-            return "Here are some similar products from our database. Please select:"
-        return "Product not found in our database. Please provide the image URL of the product."
+            return "Here are some similar products from our database. Please select:", "no success"
+            
+        return "Product not found in our database. Please provide the image URL of the product.", "no success"
 
     @staticmethod
     def _handle_product_url(user_input):
@@ -834,11 +841,11 @@ class ChatManager:
             )
             st.session_state.product_selected = True
             if msg != "product not found because image is not clear":
-                return msg
+                return msg, "success"
             else:
-                return msg + ". Please share clear image URLs!"
+                return msg + ". Please share clear image URLs!", "no success"
                 
-        return "Please provide valid image URL of the product."
+        return "Please provide valid image URL of the product.", "no success"
 
 def main():
     # Initialize session state
@@ -875,9 +882,9 @@ def main():
                 st.markdown(user_input)
             
             # Process response
-            response = ChatManager.process_response(user_input)
+            response, status = ChatManager.process_response(user_input)
             
-            if response == "Next Product":
+            if status == "success":
                 SessionState.initialize()  # Reset states for next product
                 #st.session_state.welcome_msg = "What is the next product you would like me to analyze today?"
                 keys_to_keep = ["messages", "welcome_msg"]
@@ -888,7 +895,7 @@ def main():
                 st.session_state.welcome_msg = "What product would you like me to analyze next?"
                 st.rerun()
                 
-            elif response:  # Only add response if it's not None
+            else:
                 st.session_state.messages.append({"role": "assistant", "content": response})
                 with st.chat_message("assistant"):
                     st.markdown(response)
