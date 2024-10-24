@@ -812,7 +812,7 @@ class ChatManager:
             "", user_input, data_extractor_url, extract_info=False
         )
         
-        if similar_products:
+        if len(similar_products) > 0:
             st.session_state.similar_products = similar_products
             st.session_state.awaiting_selection = True
             return "Here are some similar products from our database. Please select:"
