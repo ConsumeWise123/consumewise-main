@@ -59,12 +59,14 @@ def process_nutrition_data(nutrition_per_serving, user_serving_size):
 
 def find_nutrition(data):
     #data is a dict. See https://github.com/ConsumeWise123/rda1/blob/main/clientp.py
+    if not data:
+        return ""
     try:
         nutrition_per_serving = data['nutritionPerServing']
         user_serving_size = float(data['userServingSize'])
 
         if not nutrition_per_serving or user_serving_size <= 0:
-            return {"error": "Invalid nutrition data or serving size"}
+            return json.dumps({"error": "Invalid nutrition data or serving size"})
 
         # Process and respond with scaled values and daily percentages
         scaled_nutrition, percentage_daily_values = process_nutrition_data(nutrition_per_serving, user_serving_size)
@@ -75,4 +77,4 @@ def find_nutrition(data):
         return rda_analysis_str
         
     except Exception as e:
-        return {"error": "Invalid JSON or input"}
+        return json.dumps({"error" : "Invalid JSON or input"})
