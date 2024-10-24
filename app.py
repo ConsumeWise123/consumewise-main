@@ -620,6 +620,13 @@ def analyze_product(product_info_raw):
         nutritional_information = product_info_from_db['nutritionalInformation']
         serving_size = product_info_from_db["servingSize"]["quantity"]
 
+        nutrient_analysis_rda = ""
+        nutrient_analysis = ""
+        nutritional_level = ""
+        processing_level = ""
+        harmful_ingredient_analysis = ""
+        claims_analysis = ""
+        
         if nutritional_information:
             product_type, calories, sugar, salt, serving_size = find_product_nutrients(product_info_from_db)
             nutrient_analysis = analyze_nutrients(product_type, calories, sugar, salt, serving_size)
