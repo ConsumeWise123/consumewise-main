@@ -631,7 +631,7 @@ def analyze_product(product_info_raw):
             if product_type is not None and serving_size is not None:
                 nutrient_analysis = analyze_nutrients(product_type, calories, sugar, salt, serving_size)
             else:
-                return "product not found because product information in the db is corrupt."
+                return "product not found because product information in the db is corrupt"
                 
             print(f"DEBUG ! nutrient analysis is {nutrient_analysis}")
             
@@ -778,7 +778,7 @@ class ProductSelector:
                                 del st.session_state[key]
                             st.session_state.welcome_msg = "What product would you like me to analyze next?"
                             
-                    if choice == "None of the above" or msg == "product not found from the db":
+                    if choice == "None of the above" or msg == "product not found from the db" or msg == "product not found because product information in the db is corrupt":
                         st.session_state.awaiting_selection = False
                         st.session_state.messages.append(
                             {"role": "assistant", "content": "Please provide the image URL of the product to analyze based on the latest information."}
