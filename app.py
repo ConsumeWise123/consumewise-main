@@ -766,6 +766,7 @@ class ProductSelector:
                     st.session_state.awaiting_selection = False
                     if choice != "None of the above":
                         st.session_state.selected_product = choice
+                        st.session_state.messages.append({"role": "assistant", "content": f"You selected {choice}"})
                         _, msg = chatbot_response("", choice, data_extractor_url="", extract_info=True)
                         if msg != "product not found from the db" and msg != "product not found because product information in the db is corrupt":
                             #Only when msg is acceptable
@@ -812,7 +813,6 @@ class ChatManager:
             "", user_input, data_extractor_url, extract_info=False
         )
         
-        print(f"DEBUG : similar products {similar_products}")
         
         if len(similar_products) > 0:
             st.session_state.similar_products = similar_products
@@ -833,8 +833,11 @@ class ChatManager:
                 user_input, "", data_extractor_url, extract_info=True
             )
             st.session_state.product_selected = True
-            return msg
-            
+            if msg != "product not found because image is not clear"
+                return msg
+            else:
+                return msg + ". Please share clear image URLs!"
+                
         return "Please provide valid image URL of the product."
 
 def main():
@@ -890,7 +893,6 @@ def main():
                 with st.chat_message("assistant"):
                     st.markdown(response)
                 print(f"DEBUG : st.session_state.awaiting_selection : {st.session_state.awaiting_selection}")
-                print(f"response : {response}")
                 st.rerun()
     else:
         # Disable chat input while selection is in progress
