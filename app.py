@@ -556,8 +556,11 @@ Claims Analysis:
         ]
     )
 
-    return f"{brand_name} {product_name} -- " + completion.choices[0].message.content
-
+    return f"""
+    Brand : {brand_name}
+    Product : {product_name}
+    {completion.choices[0].message.content}
+    """
 
 def analyze_product(product_info_raw):
     global assistant1, assistant2, assistant3
