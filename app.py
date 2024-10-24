@@ -764,13 +764,13 @@ class ProductSelector:
                 msg = ""
                 if confirm_clicked:
                     if choice != "None of the above":
-                        st.session_state.product_selected = True
-                        st.session_state.awaiting_selection = False
                         st.session_state.selected_product = choice
                         _, msg = chatbot_response("", choice, data_extractor_url="", extract_info=True)
                         st.session_state.messages.append({"role": "assistant", "content": msg})
                         if msg != "product not found from the db":
-                            # Loop through session state keys and delete all except the key_to_keep
+                            #Only when msg is acceptable
+                            st.session_state.product_selected = True
+                            st.session_state.awaiting_selection = False
                             keys_to_keep = ["messages", "welcome_msg"]
                             keys_to_delete = [key for key in st.session_state.keys() if key not in keys_to_keep]
                         
