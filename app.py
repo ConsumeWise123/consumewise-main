@@ -356,7 +356,7 @@ def analyze_processing_level(ingredients, assistant_id):
         include=["step_details.tool_calls[*].file_search.results[*].content"]
     )
     
-        # Polling loop to wait for a response in the thread
+    # Polling loop to wait for a response in the thread
     messages = []
     max_retries = 10  # You can set a maximum retry limit
     retries = 0
@@ -404,7 +404,7 @@ def analyze_harmful_ingredients(ingredients, assistant_id):
         include=["step_details.tool_calls[*].file_search.results[*].content"]
     )
     
-        # Polling loop to wait for a response in the thread
+    # Polling loop to wait for a response in the thread
     messages = []
     max_retries = 10  # You can set a maximum retry limit
     retries = 0
@@ -475,7 +475,7 @@ The output must be in JSON format as follows:
         include=["step_details.tool_calls[*].file_search.results[*].content"]
     )
     
-        # Polling loop to wait for a response in the thread
+    # Polling loop to wait for a response in the thread
     messages = []
     max_retries = 10  # You can set a maximum retry limit
     retries = 0
