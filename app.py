@@ -371,7 +371,7 @@ def analyze_processing_level(ingredients, assistant_id):
 
     # Check if we got the message content
     if not messages:
-        raise TimeoutError("No messages were returned after polling.")
+        raise TimeoutError("Processing Level : No messages were returned after polling.")
 
     message_content = messages[0].content[0].text
     annotations = message_content.annotations
@@ -419,7 +419,7 @@ def analyze_harmful_ingredients(ingredients, assistant_id):
 
     # Check if we got the message content
     if not messages:
-        raise TimeoutError("No messages were returned after polling.")
+        raise TimeoutError("Processing Ingredients : No messages were returned after polling.")
         
     message_content = messages[0].content[0].text
     annotations = message_content.annotations
@@ -490,7 +490,7 @@ The output must be in JSON format as follows:
 
     # Check if we got the message content
     if not messages:
-        raise TimeoutError("No messages were returned after polling.")
+        raise TimeoutError("Processing Claims : No messages were returned after polling.")
 
     message_content = messages[0].content[0].text
     
