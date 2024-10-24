@@ -833,7 +833,7 @@ class ChatManager:
                 user_input, "", data_extractor_url, extract_info=True
             )
             st.session_state.product_selected = True
-            if msg != "product not found because image is not clear"
+            if msg != "product not found because image is not clear":
                 return msg
             else:
                 return msg + ". Please share clear image URLs!"
