@@ -356,7 +356,22 @@ def analyze_processing_level(ingredients, assistant_id):
         include=["step_details.tool_calls[*].file_search.results[*].content"]
     )
     
-    messages = list(client.beta.threads.messages.list(thread_id=thread.id, run_id=run.id))
+        # Polling loop to wait for a response in the thread
+    messages = []
+    max_retries = 10  # You can set a maximum retry limit
+    retries = 0
+    wait_time = 2  # Seconds to wait between retries
+
+    while retries < max_retries:
+        messages = list(client.beta.threads.messages.list(thread_id=thread.id, run_id=run.id))
+        if messages:  # If we receive any messages, break the loop
+            break
+        retries += 1
+        time.sleep(wait_time)
+
+    # Check if we got the message content
+    if not messages:
+        raise TimeoutError("No messages were returned after polling.")
 
     message_content = messages[0].content[0].text
     annotations = message_content.annotations
@@ -389,7 +404,23 @@ def analyze_harmful_ingredients(ingredients, assistant_id):
         include=["step_details.tool_calls[*].file_search.results[*].content"]
     )
     
-    messages = list(client.beta.threads.messages.list(thread_id=thread.id, run_id=run.id))
+        # Polling loop to wait for a response in the thread
+    messages = []
+    max_retries = 10  # You can set a maximum retry limit
+    retries = 0
+    wait_time = 2  # Seconds to wait between retries
+
+    while retries < max_retries:
+        messages = list(client.beta.threads.messages.list(thread_id=thread.id, run_id=run.id))
+        if messages:  # If we receive any messages, break the loop
+            break
+        retries += 1
+        time.sleep(wait_time)
+
+    # Check if we got the message content
+    if not messages:
+        raise TimeoutError("No messages were returned after polling.")
+        
     message_content = messages[0].content[0].text
     annotations = message_content.annotations
 
@@ -444,7 +475,22 @@ The output must be in JSON format as follows:
         include=["step_details.tool_calls[*].file_search.results[*].content"]
     )
     
-    messages = list(client.beta.threads.messages.list(thread_id=thread.id, run_id=run.id))
+        # Polling loop to wait for a response in the thread
+    messages = []
+    max_retries = 10  # You can set a maximum retry limit
+    retries = 0
+    wait_time = 2  # Seconds to wait between retries
+
+    while retries < max_retries:
+        messages = list(client.beta.threads.messages.list(thread_id=thread.id, run_id=run.id))
+        if messages:  # If we receive any messages, break the loop
+            break
+        retries += 1
+        time.sleep(wait_time)
+
+    # Check if we got the message content
+    if not messages:
+        raise TimeoutError("No messages were returned after polling.")
 
     message_content = messages[0].content[0].text
     
