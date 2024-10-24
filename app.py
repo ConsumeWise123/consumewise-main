@@ -515,7 +515,10 @@ The output must be in JSON format as follows:
     #              claims_not_found_in_doc.append(key)
     #    print(f"Claims not found in the doc are {','.join(claims_not_found_in_doc)}")
     #claims_analysis = json.loads(message_content.value.replace("```", "").replace("json", "").replace("(NOT FOUND IN DOCUMENT) ", ""))
-    claims_analysis = json.loads(message_content.value.replace("```", "").replace("json", ""))
+    claims_analysis = {}
+    
+    if message_content.value != "":
+        claims_analysis = json.loads(message_content.value.replace("```", "").replace("json", ""))
 
     claims_analysis_str = ""
     for key, value in claims_analysis.items():
