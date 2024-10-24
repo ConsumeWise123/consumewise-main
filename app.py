@@ -178,7 +178,7 @@ def find_product_nutrients(product_info_from_db):
             if 'sodium' in item['name'].lower():
                 salt += item['values'][0]['value']
 
-    #How to get Salt?
+    
     if added_sugar is not None and added_sugar > 0 and sugar is None:
         sugar = added_sugar
     elif total_sugar is not None and total_sugar > 0 and added_sugar is None and sugar is None:
@@ -628,7 +628,11 @@ def analyze_product(product_info_raw):
         
         if nutritional_information:
             product_type, calories, sugar, salt, serving_size = find_product_nutrients(product_info_from_db)
-            nutrient_analysis = analyze_nutrients(product_type, calories, sugar, salt, serving_size)
+            if product_type is not None and serving_size is not None:
+                nutrient_analysis = analyze_nutrients(product_type, calories, sugar, salt, serving_size)
+            else:
+                return "product not found because product information in the db is corrupt."
+                
             print(f"DEBUG ! nutrient analysis is {nutrient_analysis}")
             
             nutrient_analysis_rda_data = rda_analysis(nutritional_information, serving_size)
@@ -650,8 +654,8 @@ def analyze_product(product_info_raw):
                 
         final_analysis = generate_final_analysis(brand_name, product_name, nutritional_level, processing_level, harmful_ingredient_analysis, claims_analysis)
         return final_analysis
-    else:
-        return "I'm sorry, product information could not be extracted from the url."    
+    #else:
+    #    return "product not found because product information could not be extracted."    
 
 # Streamlit app
 # Initialize session state
@@ -680,6 +684,8 @@ def chatbot_response(image_urls_str, product_name_by_user, data_extractor_url, e
             with st.spinner("Analyzing the product... This may take a moment."):
                 product_info_raw = get_product_data_from_db(product_name_by_user, data_extractor_url)
                 print(f"DEBUG product_info_raw from name: {product_info_raw}")
+                if product_info_raw == "{}":
+                    return [], "product not found from the db"
                 if 'error' not in json.loads(product_info_raw).keys():
                     final_analysis = analyze_product(product_info_raw)
                     return [], final_analysis
@@ -701,6 +707,8 @@ def chatbot_response(image_urls_str, product_name_by_user, data_extractor_url, e
         with st.spinner("Analyzing the product... This may take a moment."):
             product_info_raw = extract_data_from_product_image(image_urls, data_extractor_url)
             print(f"DEBUG product_info_raw from image : {product_info_raw}")
+            if product_info_raw == "{}":
+                return [], "product not found because image is not clear"
             if 'error' not in json.loads(product_info_raw).keys():
                 final_analysis = analyze_product(product_info_raw)
                 return [], final_analysis
@@ -753,25 +761,27 @@ class ProductSelector:
                 confirm_clicked = st.button("Confirm Selection")
                 
                 # Only process the selection when confirm is clicked
+                msg = ""
                 if confirm_clicked:
                     if choice != "None of the above":
                         st.session_state.product_selected = True
                         st.session_state.awaiting_selection = False
                         st.session_state.selected_product = choice
-                        _, msg = chatbot_response("", choice, data_extractor_url, extract_info=True)
+                        _, msg = chatbot_response("", choice, data_extractor_url="", extract_info=True)
                         st.session_state.messages.append({"role": "assistant", "content": msg})
-
-                        # Loop through session state keys and delete all except the key_to_keep
-                        keys_to_keep = ["messages", "welcome_msg"]
-                        keys_to_delete = [key for key in st.session_state.keys() if key not in keys_to_keep]
-                    
-                        for key in keys_to_delete:
-                            del st.session_state[key]
-                        st.session_state.welcome_msg = "What product would you like me to analyze next?"
-                    else:
+                        if msg != "product not found from the db":
+                            # Loop through session state keys and delete all except the key_to_keep
+                            keys_to_keep = ["messages", "welcome_msg"]
+                            keys_to_delete = [key for key in st.session_state.keys() if key not in keys_to_keep]
+                        
+                            for key in keys_to_delete:
+                                del st.session_state[key]
+                            st.session_state.welcome_msg = "What product would you like me to analyze next?"
+                            
+                    if choice == "None of the above" or msg == "product not found from the db":
                         st.session_state.awaiting_selection = False
                         st.session_state.messages.append(
-                            {"role": "assistant", "content": "Please provide the image URL of the product."}
+                            {"role": "assistant", "content": "Please provide the image URL of the product to analyze based on the latest information."}
                         )
                         
                     st.rerun()
