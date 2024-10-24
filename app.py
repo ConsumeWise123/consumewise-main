@@ -812,6 +812,8 @@ class ChatManager:
             "", user_input, data_extractor_url, extract_info=False
         )
         
+        print(f"DEBUG : similar products {similar_products}")
+        
         if len(similar_products) > 0:
             st.session_state.similar_products = similar_products
             st.session_state.awaiting_selection = True
