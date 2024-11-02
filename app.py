@@ -152,9 +152,9 @@ def find_product_nutrients(product_info_from_db):
     salt = None
     serving_size = None
 
-    if product_info_from_db["servingSize"]["unit"] == "g":
+    if product_info_from_db["servingSize"]["unit"].lower() == "g":
         product_type = "solid"
-    elif product_info_from_db["servingSize"]["unit"] == "ml":
+    elif product_info_from_db["servingSize"]["unit"].lower() == "ml":
         product_type = "liquid"
     serving_size = product_info_from_db["servingSize"]["quantity"]
 
